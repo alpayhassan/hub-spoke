@@ -1,6 +1,6 @@
 locals {
   onprem-location = "uksouth"
-  onprem-rgname = "onprem-vnet-rg"
+  onprem-rgname   = "onprem-vnet-rg"
 
 }
 
@@ -51,7 +51,7 @@ resource "azurerm_virtual_network_gateway" "onprem-vpn-gateway" {
   type     = "Vpn"
   vpn_type = "RouteBased"
 
-  sku           = var.gw_sku
+  sku        = var.gw_sku
   generation = "Generation1"
 
   ip_configuration {
