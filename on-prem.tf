@@ -22,12 +22,21 @@ resource "azurerm_subnet" "onprem-subnet" {
   address_prefixes     = ["10.3.0.0/24"]
 }
 
+resource "azurerm_subnet" "onprem-gateway-subnet" {
+  name                 = "GatewaySubnet"
+  resource_group_name  = local.onprem-rgname
+  virtual_network_name = azurerm_virtual_network.onprem-vnet.name
+  address_prefixes     = ["10.3.1.0/27"]
+}
+
 resource "azurerm_public_ip" "onprem-pip" {
   name                = "onprem-pip"
   location            = local.onprem-location
   resource_group_name = local.onprem-rgname
   allocation_method   = "Dynamic"
 }
+
+
 
 # NSG & Rule
 resource "azurerm_network_security_group" "onprem-nsg" {
@@ -46,6 +55,7 @@ resource "azurerm_network_security_group" "onprem-nsg" {
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
+  depends_on = [azurerm_resource_group.onprem-rg]
 }
 
 resource "azurerm_subnet_network_security_group_association" "onprem-subnet-nsg-association" {
@@ -82,7 +92,7 @@ resource "azurerm_linux_virtual_machine" "onprem-vm" {
 
   admin_ssh_key {
     username   = var.username
-    public_key = file("~/.ssh/id_rsa.pub")
+    public_key = file("./linux-vmkey.pub")
   }
 
   os_disk {
@@ -99,15 +109,8 @@ resource "azurerm_linux_virtual_machine" "onprem-vm" {
 }
 
 
-
+/*
 # On-prem vpn gateway with gateway subnet and pip
-resource "azurerm_subnet" "onprem-gateway-subnet" {
-  name                 = "GatewaySubnet"
-  resource_group_name  = local.onprem-rgname
-  virtual_network_name = azurerm_virtual_network.onprem-vnet.name
-  address_prefixes     = ["10.3.1.0/27"]
-}
-
 resource "azurerm_public_ip" "gw-pip" {
   name                = "gateway-pip"
   location            = local.onprem-location
@@ -135,3 +138,4 @@ resource "azurerm_virtual_network_gateway" "onprem-vpn-gateway" {
   }
   depends_on = [azurerm_public_ip.gw-pip]
 }
+*/
