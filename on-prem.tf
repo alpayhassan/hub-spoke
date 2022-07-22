@@ -1,52 +1,125 @@
 locals {
   onprem-location = "uksouth"
-  onprem-rgname   = "onprem-vnet-rg"
-
+  onprem-rgname   = "onprem-rg"
 }
 
-resource "azurerm_resource_group" "on-prem-rg" {
+resource "azurerm_resource_group" "onprem-rg" {
   name     = local.onprem-rgname
   location = local.onprem-location
 }
 
-resource "azurerm_virtual_network" "on-prem-vnet" {
+resource "azurerm_virtual_network" "onprem-vnet" {
   name                = "onprem-vnet"
   location            = local.onprem-location
   resource_group_name = local.onprem-rgname
   address_space       = ["10.3.0.0/16"]
+}
 
-  subnet {
-    name           = "default-onprem"
-    address_prefix = "10.3.0.0/24"
+resource "azurerm_subnet" "onprem-subnet" {
+  name                 = "default"
+  resource_group_name  = local.onprem-rgname
+  virtual_network_name = azurerm_virtual_network.onprem-vnet.name
+  address_prefixes     = ["10.3.0.0/24"]
+}
+
+resource "azurerm_public_ip" "onprem-pip" {
+  name                = "onprem-pip"
+  location            = local.onprem-location
+  resource_group_name = local.onprem-rgname
+  allocation_method   = "Dynamic"
+}
+
+# NSG & Rule
+resource "azurerm_network_security_group" "onprem-nsg" {
+  name                = "onprem-nsg"
+  location            = local.onprem-location
+  resource_group_name = local.onprem-rgname
+
+  security_rule {
+    name                       = "SSH"
+    priority                   = 1001
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = 22
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
   }
 }
 
-# NSGs
+resource "azurerm_subnet_network_security_group_association" "onprem-subnet-nsg-association" {
+  subnet_id                 = azurerm_subnet.onprem-subnet.id
+  network_security_group_id = azurerm_network_security_group.onprem-nsg.id
+}
 
 
-# Creating a VM to act as a VPN device to provivde external connectivity to on_prem
+
+# On-prem VM
+resource "azurerm_network_interface" "onprem-nic" {
+  name                 = "onprem-nic"
+  location             = local.onprem-location
+  resource_group_name  = local.onprem-rgname
+  enable_ip_forwarding = true
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = azurerm_subnet.onprem-subnet.id
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.onprem-pip.id
+  }
+}
+
+resource "azurerm_linux_virtual_machine" "onprem-vm" {
+  name                = "onprem-vm"
+  location            = local.onprem-location
+  resource_group_name = local.onprem-rgname
+  size                = var.vmsize
+  admin_username      = var.username
+  network_interface_ids = [
+    azurerm_network_interface.onprem-nic.id
+  ]
+
+  admin_ssh_key {
+    username   = var.username
+    public_key = file("~/.ssh/id_rsa.pub")
+  }
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "UbuntuServer"
+    sku       = "16.04-LTS"
+    version   = "latest"
+  }
+}
 
 
-# Creating an on-prem vpn gateway with gateway subnet and pip
+
+# On-prem vpn gateway with gateway subnet and pip
 resource "azurerm_subnet" "onprem-gateway-subnet" {
   name                 = "GatewaySubnet"
-  resource_group_name  = var.rgname
-  virtual_network_name = var.vnname
+  resource_group_name  = local.onprem-rgname
+  virtual_network_name = azurerm_virtual_network.onprem-vnet.name
   address_prefixes     = ["10.3.1.0/27"]
 }
 
-resource "azurerm_public_ip" "onprem-public-ip" {
-  name                = "hub_gateway_ip"
-  location            = var.location
-  resource_group_name = var.rgname
+resource "azurerm_public_ip" "gw-pip" {
+  name                = "gateway-pip"
+  location            = local.onprem-location
+  resource_group_name = local.onprem-rgname
 
   allocation_method = "Dynamic"
 }
 
 resource "azurerm_virtual_network_gateway" "onprem-vpn-gateway" {
   name                = "onprem-gateway"
-  location            = var.location
-  resource_group_name = var.rgname
+  location            = local.onprem-location
+  resource_group_name = local.onprem-rgname
 
   type     = "Vpn"
   vpn_type = "RouteBased"
@@ -56,9 +129,9 @@ resource "azurerm_virtual_network_gateway" "onprem-vpn-gateway" {
 
   ip_configuration {
     name                          = "vnetGatewayConfig"
-    public_ip_address_id          = azurerm_public_ip.gw_ip.id
+    public_ip_address_id          = azurerm_public_ip.gw-pip.id
     private_ip_address_allocation = "Dynamic"
-    subnet_id                     = azurerm_subnet.gw_subnet.id
+    subnet_id                     = azurerm_subnet.onprem-gateway-subnet.id
   }
-  depends_on = [azurerm_public_ip.gw_ip]
+  depends_on = [azurerm_public_ip.gw-pip]
 }
