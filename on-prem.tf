@@ -109,10 +109,10 @@ resource "azurerm_linux_virtual_machine" "onprem-vm" {
 }
 
 
-/*
+
 # On-prem vpn gateway with gateway subnet and pip
-resource "azurerm_public_ip" "gw-pip" {
-  name                = "gateway-pip"
+resource "azurerm_public_ip" "onprem-gateway-pip" {
+  name                = "onprem-GW-pip"
   location            = local.onprem-location
   resource_group_name = local.onprem-rgname
 
@@ -120,7 +120,7 @@ resource "azurerm_public_ip" "gw-pip" {
 }
 
 resource "azurerm_virtual_network_gateway" "onprem-vpn-gateway" {
-  name                = "onprem-gateway"
+  name                = "onprem-GW"
   location            = local.onprem-location
   resource_group_name = local.onprem-rgname
 
@@ -132,10 +132,9 @@ resource "azurerm_virtual_network_gateway" "onprem-vpn-gateway" {
 
   ip_configuration {
     name                          = "vnetGatewayConfig"
-    public_ip_address_id          = azurerm_public_ip.gw-pip.id
+    public_ip_address_id          = azurerm_public_ip.onprem-gateway-pip.id
     private_ip_address_allocation = "Dynamic"
     subnet_id                     = azurerm_subnet.onprem-gateway-subnet.id
   }
-  depends_on = [azurerm_public_ip.gw-pip]
+  depends_on = [azurerm_public_ip.onprem-gateway-pip]
 }
-*/
