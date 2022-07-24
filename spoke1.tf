@@ -44,7 +44,7 @@ resource "azurerm_linux_virtual_machine" "spoke1vm1" {
   size                = var.vmsize
   admin_username      = var.username
   network_interface_ids = [
-    azurerm_network_interface.spoke1-nic.id,
+    azurerm_network_interface.spoke1-nic.id
   ]
 
   admin_ssh_key {
@@ -66,4 +66,17 @@ resource "azurerm_linux_virtual_machine" "spoke1vm1" {
 }
 
 
-# VNet peering between this spoke and the hub
+# VNet peering between hub and spoke
+resource "azurerm_virtual_network_peering" "hub-to-spoke1-peering" {
+  name                      = "peeringhubtospoke1"
+  resource_group_name       = local.spoke1-rgname
+  virtual_network_name      = azurerm_virtual_network.hub-vnet.name
+  remote_virtual_network_id = azurerm_virtual_network.spoke1-vnet.id
+}
+
+resource "azurerm_virtual_network_peering" "spoke1-to-hub-peering" {
+  name                      = "peeringspoke1tohub"
+  resource_group_name       = local.spoke1-rgname
+  virtual_network_name      = azurerm_virtual_network.spoke1-vnet.name
+  remote_virtual_network_id = azurerm_virtual_network.hub-vnet.id
+}
