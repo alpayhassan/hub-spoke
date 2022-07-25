@@ -1,5 +1,5 @@
 locals {
-  spoke1-rgname = "Development Environment"
+  spoke1-rgname   = "development-environment-RG"
   spoke1-location = "uksouth"
 }
 
@@ -15,24 +15,31 @@ resource "azurerm_virtual_network" "spoke1-vnet" {
   resource_group_name = local.spoke1-rgname
 }
 
-resource "azurerm_subnet" "spoke1-subnet" {
+resource "azurerm_subnet" "spoke1-mgmt-subnet" {
   name                 = "development-default-subnet"
   resource_group_name  = local.spoke1-rgname
   virtual_network_name = azurerm_virtual_network.spoke1-vnet.name
-  address_prefixes     = ["10.5.0.0/24"]
+  address_prefixes     = ["10.5.0.0/27"]
+}
+
+resource "azurerm_subnet" "spoke1-workload-subnet" {
+  name                 = "spoke1-workload-subnet"
+  resource_group_name  = local.spoke1-rgname
+  virtual_network_name = azurerm_virtual_network.spoke1-vnet.name
+  address_prefixes     = ["10.5.1.0/24"]
 }
 
 
 # Creating development environment VMs
 resource "azurerm_network_interface" "spoke1-nic" {
-  name                = "spoke1-nic"
-  location            = local.spoke1-location
-  resource_group_name = local.spoke1-rgname
+  name                 = "spoke1-nic"
+  location             = local.spoke1-location
+  resource_group_name  = local.spoke1-rgname
   enable_ip_forwarding = true
 
   ip_configuration {
     name                          = "spoke1"
-    subnet_id                     = azurerm_subnet.spoke1-subnet.id
+    subnet_id                     = azurerm_subnet.spoke1-mgmt-subnet.id
     private_ip_address_allocation = "Dynamic"
   }
 }
@@ -68,15 +75,27 @@ resource "azurerm_linux_virtual_machine" "spoke1vm1" {
 
 # VNet peering between hub and spoke
 resource "azurerm_virtual_network_peering" "hub-to-spoke1-peering" {
-  name                      = "peeringhubtospoke1"
-  resource_group_name       = local.spoke1-rgname
+  name                      = "peering-hubtospoke1"
+  resource_group_name       = azurerm_resource_group.hub-rg.name
   virtual_network_name      = azurerm_virtual_network.hub-vnet.name
   remote_virtual_network_id = azurerm_virtual_network.spoke1-vnet.id
+  allow_virtual_network_access = true
+  allow_forwarded_traffic   = true
+  allow_gateway_transit     = true
+  use_remote_gateways       = false
+
+  depends_on                = [azurerm_virtual_network.hub-vnet, azurerm_virtual_network_gateway.hub-vpn-gateway, azurerm_virtual_network.spoke1-vnet]
 }
 
 resource "azurerm_virtual_network_peering" "spoke1-to-hub-peering" {
-  name                      = "peeringspoke1tohub"
+  name                      = "peering-spoke1tohub"
   resource_group_name       = local.spoke1-rgname
   virtual_network_name      = azurerm_virtual_network.spoke1-vnet.name
   remote_virtual_network_id = azurerm_virtual_network.hub-vnet.id
+  allow_virtual_network_access = true
+  allow_forwarded_traffic   = true
+  allow_gateway_transit     = false
+  use_remote_gateways       = true
+  
+  depends_on                = [azurerm_virtual_network.hub-vnet, azurerm_virtual_network_gateway.hub-vpn-gateway, azurerm_virtual_network.spoke1-vnet]
 }
