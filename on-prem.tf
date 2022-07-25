@@ -73,7 +73,7 @@ resource "azurerm_network_interface" "onprem-nic" {
   enable_ip_forwarding = true
 
   ip_configuration {
-    name                          = "internal"
+    name                          = "onprem"
     subnet_id                     = azurerm_subnet.onprem-subnet.id
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.onprem-pip.id
