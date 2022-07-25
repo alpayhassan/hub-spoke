@@ -1,6 +1,6 @@
 locals {
   hub-rgname   = "hub-vnet-rg"
-  hub-location = "ukwest"
+  hub-location = "uksouth"
   IPSec-key    = "4-v3ry-53cr37-1p53c-5h4r3d-k3y"
 }
 
@@ -17,10 +17,17 @@ resource "azurerm_virtual_network" "hub-vnet" {
 }
 
 resource "azurerm_subnet" "hub-subnet" {
-  name                 = "default-hub"
+  name                 = "mgmt-subnet-hub"
   resource_group_name  = local.hub-rgname
   virtual_network_name = azurerm_virtual_network.hub-vnet.name
   address_prefixes     = ["10.4.0.0/24"]
+}
+
+resource "azurerm_subnet" "hub-dmz-subnet" {
+  name                 = "dmz-subnet-hub"
+  resource_group_name  = local.hub-rgname
+  virtual_network_name = azurerm_virtual_network.hub-vnet.name
+  address_prefixes     = ["10.4.2.0/24"]
 }
 
 resource "azurerm_subnet" "hub-gateway-subnet" {
@@ -105,13 +112,13 @@ resource "azurerm_virtual_network_gateway" "hub-vpn-gateway" {
     name                          = "vnetGatewayConfig"
     public_ip_address_id          = azurerm_public_ip.hub-gateway-pip.id
     private_ip_address_allocation = "Dynamic"
-    subnet_id                     = azurerm_subnet.onprem-gateway-subnet.id
+    subnet_id                     = azurerm_subnet.hub-gateway-subnet.id
   }
   depends_on = [azurerm_public_ip.hub-gateway-pip]
 }
 
 
-# Creating a connection between on-prem and hub VNETs
+# Gateway connection between on-prem and hub VNETs
 resource "azurerm_virtual_network_gateway_connection" "onprem-to-hub" {
   name                = "onprem-to-hub"
   location            = azurerm_resource_group.onprem-rg.location
