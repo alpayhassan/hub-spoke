@@ -31,8 +31,8 @@ resource "azurerm_virtual_network_peering" "hub-to-spoke2-peering" {
   virtual_network_name      = azurerm_virtual_network.hub-vnet.name
   remote_virtual_network_id = azurerm_virtual_network.spoke2-vnet.id
   allow_forwarded_traffic   = true
-  allow_gateway_transit     = false
-  use_remote_gateways       = true
+  allow_gateway_transit     = true
+  use_remote_gateways       = false
 
   depends_on                = [azurerm_virtual_network.hub-vnet, azurerm_virtual_network_gateway.hub-vpn-gateway, azurerm_virtual_network.spoke2-vnet]
 }
@@ -43,8 +43,8 @@ resource "azurerm_virtual_network_peering" "spoke2-to-hub-peering" {
   virtual_network_name      = azurerm_virtual_network.spoke2-vnet.name
   remote_virtual_network_id = azurerm_virtual_network.hub-vnet.id
   allow_forwarded_traffic   = true
-  allow_gateway_transit     = true
-  use_remote_gateways       = false
+  allow_gateway_transit     = false
+  use_remote_gateways       = true
 
   depends_on                = [azurerm_virtual_network.hub-vnet, azurerm_virtual_network_gateway.hub-vpn-gateway, azurerm_virtual_network.spoke2-vnet]
 }
