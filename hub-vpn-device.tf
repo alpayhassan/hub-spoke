@@ -20,7 +20,7 @@ resource "azurerm_network_interface" "device-nic" {
     name                          = local.prefix-device
     subnet_id                     = azurerm_subnet.hub-dmz-subnet.id
     private_ip_address_allocation = "Static"
-    private_ip_address            = "10.4.2.12"
+    private_ip_address            = "10.0.0.36"
   }
   depends_on = [azurerm_subnet.hub-dmz-subnet]
 }

@@ -6,22 +6,22 @@ resource "azurerm_route_table" "hub-gateway-rt" {
 
   route {
     name           = "to-hub"
-    address_prefix = "10.4.0.0/16"
+    address_prefix = "10.0.0.0/16"
     next_hop_type  = "VnetLocal"
   }
 
   route {
     name                   = "to-spoke1"
-    address_prefix         = "10.5.0.0/16"
+    address_prefix         = "10.1.0.0/16"
     next_hop_type          = "VirtualAppliance"
-    next_hop_in_ip_address = "10.4.0.36"
+    next_hop_in_ip_address = "10.0.0.36"
   }
 
   route {
     name                   = "to-spoke2"
-    address_prefix         = "10.6.0.0/16"
+    address_prefix         = "10.2.0.0/16"
     next_hop_type          = "VirtualAppliance"
-    next_hop_in_ip_address = "10.4.0.36"
+    next_hop_in_ip_address = "10.0.0.36"
   }
 }
 
@@ -42,9 +42,9 @@ resource "azurerm_route_table" "spoke1-rt" {
 
   route {
     name                   = "to-spoke2"
-    address_prefix         = "10.6.0.0/16"
+    address_prefix         = "10.2.0.0/16"
     next_hop_type          = "VirtualAppliance"
-    next_hop_in_ip_address = "10.4.0.36"
+    next_hop_in_ip_address = "10.0.0.36"
   }
 
   route {
@@ -77,9 +77,9 @@ resource "azurerm_route_table" "spoke2-rt" {
 
   route {
     name                   = "to-spoke1"
-    address_prefix         = "10.5.0.0/16"
+    address_prefix         = "10.1.0.0/16"
     next_hop_type          = "VirtualAppliance"
-    next_hop_in_ip_address = "10.4.0.36"
+    next_hop_in_ip_address = "10.0.0.36"
   }
 
   route {

@@ -10,7 +10,7 @@ resource "azurerm_resource_group" "spoke1-rg" {
 
 resource "azurerm_virtual_network" "spoke1-vnet" {
   name                = "development-network"
-  address_space       = ["10.5.0.0/16"]
+  address_space       = ["10.1.0.0/16"]
   location            = local.spoke1-location
   resource_group_name = local.spoke1-rgname
 }
@@ -19,14 +19,14 @@ resource "azurerm_subnet" "spoke1-mgmt-subnet" {
   name                 = "development-default-subnet"
   resource_group_name  = local.spoke1-rgname
   virtual_network_name = azurerm_virtual_network.spoke1-vnet.name
-  address_prefixes     = ["10.5.0.0/27"]
+  address_prefixes     = ["10.1.0.64/27"]
 }
 
 resource "azurerm_subnet" "spoke1-workload-subnet" {
   name                 = "spoke1-workload-subnet"
   resource_group_name  = local.spoke1-rgname
   virtual_network_name = azurerm_virtual_network.spoke1-vnet.name
-  address_prefixes     = ["10.5.1.0/24"]
+  address_prefixes     = ["10.1.1.0/24"]
 }
 
 

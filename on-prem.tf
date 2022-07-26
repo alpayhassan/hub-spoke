@@ -12,21 +12,21 @@ resource "azurerm_virtual_network" "onprem-vnet" {
   name                = "onprem-vnet"
   location            = local.onprem-location
   resource_group_name = local.onprem-rgname
-  address_space       = ["10.3.0.0/16"]
+  address_space       = ["192.168.0.0/16"]
 }
 
 resource "azurerm_subnet" "onprem-subnet" {
   name                 = "default"
   resource_group_name  = local.onprem-rgname
   virtual_network_name = azurerm_virtual_network.onprem-vnet.name
-  address_prefixes     = ["10.3.0.0/24"]
+  address_prefixes     = ["192.168.1.128/25"]
 }
 
 resource "azurerm_subnet" "onprem-gateway-subnet" {
   name                 = "GatewaySubnet"
   resource_group_name  = local.onprem-rgname
   virtual_network_name = azurerm_virtual_network.onprem-vnet.name
-  address_prefixes     = ["10.3.1.0/27"]
+  address_prefixes     = ["192.168.255.224/27"]
 }
 
 resource "azurerm_public_ip" "onprem-pip" {

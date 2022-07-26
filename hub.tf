@@ -10,7 +10,7 @@ resource "azurerm_resource_group" "hub-rg" {
 
 resource "azurerm_virtual_network" "hub-vnet" {
   name                = "hub-vnet"
-  address_space       = ["10.4.0.0/16"]
+  address_space       = ["10.0.0.0/16"]
   location            = local.hub-location
   resource_group_name = local.hub-rgname
 }
@@ -19,21 +19,21 @@ resource "azurerm_subnet" "hub-subnet" {
   name                 = "mgmt-subnet-hub"
   resource_group_name  = local.hub-rgname
   virtual_network_name = azurerm_virtual_network.hub-vnet.name
-  address_prefixes     = ["10.4.0.0/24"]
+  address_prefixes     = ["10.0.0.64/27"]
 }
 
 resource "azurerm_subnet" "hub-dmz-subnet" {
   name                 = "dmz-subnet-hub"
   resource_group_name  = local.hub-rgname
   virtual_network_name = azurerm_virtual_network.hub-vnet.name
-  address_prefixes     = ["10.4.2.0/24"]
+  address_prefixes     = ["10.0.0.32/27"]
 }
 
 resource "azurerm_subnet" "hub-gateway-subnet" {
   name                 = "GatewaySubnet"
   resource_group_name  = local.hub-rgname
   virtual_network_name = azurerm_virtual_network.hub-vnet.name
-  address_prefixes     = ["10.4.1.0/27"]
+  address_prefixes     = ["10.0.255.224/27"]
 }
 
 resource "azurerm_public_ip" "hub-pip" {
