@@ -1,0 +1,13 @@
+1. Connect to the on-prem virtual machine by running the following commands:
+
+chmod 400 linux-vmkey.pem
+ssh -i linux-vmkey.pem demousr@<pip>
+
+2. Run the ping command to test connectivity to the jumpbox VM in the hub VNet
+
+ping <private_ip_address_of_hub_vm>
+
+3. Run the ping command to test connectivity to the jumpbox VMs in the spoke networks
+
+ping <private_ip_address_of_spoke1_vm>
+ping <private_ip_address_of_spoke2_vm>
