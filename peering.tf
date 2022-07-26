@@ -8,7 +8,7 @@ resource "azurerm_virtual_network_peering" "hub-to-spoke1-peering" {
   allow_gateway_transit     = true
   use_remote_gateways       = false
 
-  depends_on                = [azurerm_virtual_network.hub-vnet, azurerm_virtual_network_gateway.hub-vpn-gateway, azurerm_virtual_network.spoke1-vnet]
+  depends_on = [azurerm_virtual_network.hub-vnet, azurerm_virtual_network_gateway.hub-vpn-gateway, azurerm_virtual_network.spoke1-vnet]
 }
 
 resource "azurerm_virtual_network_peering" "spoke1-to-hub-peering" {
@@ -20,7 +20,7 @@ resource "azurerm_virtual_network_peering" "spoke1-to-hub-peering" {
   allow_gateway_transit     = false
   use_remote_gateways       = true
 
-  depends_on                = [azurerm_virtual_network.hub-vnet, azurerm_virtual_network_gateway.hub-vpn-gateway, azurerm_virtual_network.spoke1-vnet]
+  depends_on = [azurerm_virtual_network.hub-vnet, azurerm_virtual_network_gateway.hub-vpn-gateway, azurerm_virtual_network.spoke1-vnet]
 }
 
 
@@ -34,7 +34,7 @@ resource "azurerm_virtual_network_peering" "hub-to-spoke2-peering" {
   allow_gateway_transit     = true
   use_remote_gateways       = false
 
-  depends_on                = [azurerm_virtual_network.hub-vnet, azurerm_virtual_network_gateway.hub-vpn-gateway, azurerm_virtual_network.spoke2-vnet]
+  depends_on = [azurerm_virtual_network.hub-vnet, azurerm_virtual_network_gateway.hub-vpn-gateway, azurerm_virtual_network.spoke2-vnet]
 }
 
 resource "azurerm_virtual_network_peering" "spoke2-to-hub-peering" {
@@ -46,5 +46,5 @@ resource "azurerm_virtual_network_peering" "spoke2-to-hub-peering" {
   allow_gateway_transit     = false
   use_remote_gateways       = true
 
-  depends_on                = [azurerm_virtual_network.hub-vnet, azurerm_virtual_network_gateway.hub-vpn-gateway, azurerm_virtual_network.spoke2-vnet]
+  depends_on = [azurerm_virtual_network.hub-vnet, azurerm_virtual_network_gateway.hub-vpn-gateway, azurerm_virtual_network.spoke2-vnet]
 }
