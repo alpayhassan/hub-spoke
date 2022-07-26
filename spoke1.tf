@@ -71,31 +71,3 @@ resource "azurerm_linux_virtual_machine" "spoke1vm1" {
     version   = "latest"
   }
 }
-
-
-# VNet peering between hub and spoke
-resource "azurerm_virtual_network_peering" "hub-to-spoke1-peering" {
-  name                      = "peering-hubtospoke1"
-  resource_group_name       = azurerm_resource_group.hub-rg.name
-  virtual_network_name      = azurerm_virtual_network.hub-vnet.name
-  remote_virtual_network_id = azurerm_virtual_network.spoke1-vnet.id
-  allow_virtual_network_access = true
-  allow_forwarded_traffic   = true
-  allow_gateway_transit     = true
-  use_remote_gateways       = false
-
-  depends_on                = [azurerm_virtual_network.hub-vnet, azurerm_virtual_network_gateway.hub-vpn-gateway, azurerm_virtual_network.spoke1-vnet]
-}
-
-resource "azurerm_virtual_network_peering" "spoke1-to-hub-peering" {
-  name                      = "peering-spoke1tohub"
-  resource_group_name       = local.spoke1-rgname
-  virtual_network_name      = azurerm_virtual_network.spoke1-vnet.name
-  remote_virtual_network_id = azurerm_virtual_network.hub-vnet.id
-  allow_virtual_network_access = true
-  allow_forwarded_traffic   = true
-  allow_gateway_transit     = false
-  use_remote_gateways       = true
-  
-  depends_on                = [azurerm_virtual_network.hub-vnet, azurerm_virtual_network_gateway.hub-vpn-gateway, azurerm_virtual_network.spoke1-vnet]
-}

@@ -29,6 +29,7 @@ resource "azurerm_subnet" "spoke2-workload-subnet" {
   address_prefixes     = ["10.6.1.0/24"]
 }
 
+
 # Creating testing environment VMs
 resource "azurerm_network_interface" "spoke2-nic" {
   name                 = "spoke2-nic"
@@ -69,30 +70,4 @@ resource "azurerm_linux_virtual_machine" "spoke2vm1" {
     sku       = "16.04-LTS"
     version   = "latest"
   }
-}
-
-
-# VNet peering between hub and spoke
-resource "azurerm_virtual_network_peering" "hub-to-spoke2-peering" {
-  name                      = "peering-hubtospoke2"
-  resource_group_name       = azurerm_resource_group.hub-rg.name
-  virtual_network_name      = azurerm_virtual_network.hub-vnet.name
-  remote_virtual_network_id = azurerm_virtual_network.spoke2-vnet.id
-  allow_forwarded_traffic   = true
-  allow_gateway_transit     = false
-  use_remote_gateways       = false
-
-  depends_on                = [azurerm_virtual_network.hub-vnet, azurerm_virtual_network_gateway.hub-vpn-gateway, azurerm_virtual_network.spoke2-vnet]
-}
-
-resource "azurerm_virtual_network_peering" "spoke2-to-hub-peering" {
-  name                      = "peering-spoke2tohub"
-  resource_group_name       = local.spoke2-rgname
-  virtual_network_name      = azurerm_virtual_network.spoke2-vnet.name
-  remote_virtual_network_id = azurerm_virtual_network.hub-vnet.id
-  allow_forwarded_traffic   = true
-  allow_gateway_transit     = false
-  use_remote_gateways       = true
-  
-  depends_on                = [azurerm_virtual_network.hub-vnet, azurerm_virtual_network_gateway.hub-vpn-gateway, azurerm_virtual_network.spoke2-vnet]
 }
