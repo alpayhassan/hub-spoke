@@ -13,7 +13,7 @@ resource "azurerm_virtual_network_peering" "hub-to-spoke1-peering" {
 
 resource "azurerm_virtual_network_peering" "spoke1-to-hub-peering" {
   name                      = "peering-spoke1tohub"
-  resource_group_name       = local.spoke1-rgname
+  resource_group_name       = azurerm_resource_group.spoke1-rg.name
   virtual_network_name      = azurerm_virtual_network.spoke1-vnet.name
   remote_virtual_network_id = azurerm_virtual_network.hub-vnet.id
   allow_forwarded_traffic   = true
@@ -39,7 +39,7 @@ resource "azurerm_virtual_network_peering" "hub-to-spoke2-peering" {
 
 resource "azurerm_virtual_network_peering" "spoke2-to-hub-peering" {
   name                      = "peering-spoke2tohub"
-  resource_group_name       = local.spoke2-rgname
+  resource_group_name       = azurerm_resource_group.spoke2-rg.name
   virtual_network_name      = azurerm_virtual_network.spoke2-vnet.name
   remote_virtual_network_id = azurerm_virtual_network.hub-vnet.id
   allow_forwarded_traffic   = true

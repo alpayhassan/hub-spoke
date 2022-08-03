@@ -3,7 +3,7 @@ locals {
   spoke2-location = "uksouth"
 }
 
-resource "azurerm_resource_group" "example" {
+resource "azurerm_resource_group" "spoke2-rg" {
   name     = local.spoke2-rgname
   location = local.spoke2-location
 }
